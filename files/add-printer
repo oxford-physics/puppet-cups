@@ -1,0 +1,167 @@
+#!/usr/bin/python
+import os
+def IsHardy():
+    return 0== os.system("grep 8.04 /etc/issue")
+
+def IsDebian():
+     ok = os.system("grep Ubuntu /etc/issue")
+     if ok :
+        ok =  os.system('grep -i debian /etc/issue')
+     return 0==ok
+
+def IsRedhat():
+    ok = os.system('grep "Scientific Linux" /etc/issue') 
+    if ok :
+	ok =  os.system('grep "CentOS" /etc/issue')
+    if ok:
+        ok=os.system('grep "Red" /etc/issue')
+    return 0==ok
+  
+
+
+
+printers={
+"DWBSharp361" : '<Printer DWBSharp361>\n \
+Info Sharp MX-5500N\n\
+Location DWB Level 3\n\
+MakeModel Sharp MX-5500N PS, 1.1\n\
+DeviceURI lpd://pcounter2.physics.ox.ac.uk/DWBSharp361\n\
+State Idle\n\
+StateTime 1288355308\n\
+Type 8388612\n\
+Accepting Yes\n\
+Shared Yes\n\
+JobSheets none none\n\
+QuotaPeriod 0\n\
+PageLimit 0\n\
+KLimit 0\n\
+OpPolicy default\n\
+ErrorPolicy retry-job\n\
+</Printer>\n',
+'DWBSharpL5Mono': '<Printer DWBSharpL5Mono>\n\
+UUID urn:uuid:2ec47044-cc93-3b08-4a85-89d1861fb1f0\n\
+Info Sharp MX-M753U\n\
+Location\n\
+MakeModel Sharp MX-M753U PS, 1.0\n\
+DeviceURI lpd://pcounter2.physics.ox.ac.uk/DWBSharpL5Mono\n\
+State Idle\n\
+StateTime 1352132201\n\
+Type 8401108\n\
+Accepting Yes\n\
+Shared Yes\n\
+JobSheets none none\n\
+QuotaPeriod 0\n\
+PageLimit 0\n\
+KLimit 0\n\
+OpPolicy default\n\
+ErrorPolicy retry-job\n\
+</Printer>\n\
+',
+'DWBSharpL5' : '<Printer DWBSharpL5>\n \
+Info Sharp MX-5500N\n\
+Location DWB Level 5\n\
+MakeModel Sharp MX-5500N PS, 1.1\n\
+DeviceURI lpd://pcounter2.physics.ox.ac.uk/DWBSharpL5\n\
+State Idle\n\
+StateTime 1288355308\n\
+Type 8388612\n\
+Accepting Yes\n\
+Shared Yes\n\
+JobSheets none none\n\
+QuotaPeriod 0\n\
+PageLimit 0\n\
+KLimit 0\n\
+OpPolicy default\n\
+ErrorPolicy retry-job\n\
+</Printer>\n'
+,
+'DWBSharpL6' : '<DefaultPrinter DWBSharpL6>\n \
+Info Sharp MX-5500N\n\
+Location DWB Level 6\n\
+MakeModel Sharp MX-5500N PS, 1.1\n\
+DeviceURI lpd://pcounter2.physics.ox.ac.uk/DWBSharpL6\n\
+State Idle\n\
+StateTime 1288355308\n\
+Type 8388612\n\
+Accepting Yes\n\
+Shared Yes\n\
+JobSheets none none\n\
+QuotaPeriod 0\n\
+PageLimit 0\n\
+KLimit 0\n\
+OpPolicy default\n\
+ErrorPolicy retry-job\n\
+</Printer>\n'
+,
+'DWBSharpL7' : '<Printer DWBSharpL7>\n \
+Info Sharp MX-5500N\n\
+Location DWB Level 7\n\
+MakeModel Sharp MX-5500N PS, 1.1\n\
+DeviceURI lpd://pcounter2.physics.ox.ac.uk/DWBSharpL7\n\
+State Idle\n\
+StateTime 1288355308\n\
+Type 8388612\n\
+Accepting Yes\n\
+Shared Yes\n\
+JobSheets none none\n\
+QuotaPeriod 0\n\
+PageLimit 0\n\
+KLimit 0\n\
+OpPolicy default\n\
+ErrorPolicy retry-job\n\
+</Printer>\n',
+
+'alprintdwb01': '<Printer HP-Color-LaserJet-CP3525>\n\
+UUID urn:uuid:e98ef5a8-92ea-317b-6081-967ddb7e263c\n\
+AuthInfoRequired username,password\n\
+Info HP Color LaserJet CP3525\n\
+Location DWB Office\n\
+MakeModel HP Color LaserJet CP3525 Postscript (recommended)\n\
+DeviceURI smb://printserver.physics.ox.ac.uk/alprintdwb01\n\
+State Idle\n\
+StateTime 1334313428\n\
+Type 8388612\n\
+Accepting Yes\n\
+Shared Yes\n\
+JobSheets none none\n\
+QuotaPeriod 0\n\
+PageLimit 0\n\
+KLimit 0\n\
+OpPolicy default\n\
+ErrorPolicy retry-job\n\
+</Printer>\n'
+
+}
+
+import os , sys
+
+if __name__=='__main__':
+   success=[]
+   if len(sys.argv) < 2 :
+      print 'Usage:\n   ', sys.argv[0], '{printer1} [printer2] ...'
+      print 'Valid printers:'
+      print printers.keys()
+      sys.exit(1)
+
+   f=open("/etc/cups/printers.conf","a+")
+   for i in sys.argv:
+
+       if i == sys.argv[0]:
+           continue
+       if i in printers.keys():
+           f.write(printers[i])
+           success.append(i)
+   f.close() 
+   restart_cups = 0 
+   if len(success) > 0:
+      restart_cups=1
+   if restart_cups:
+     cups_init_executable = "/etc/init.d/cups"
+     if IsHardy():
+        cups_init_executable = "/etc/init.d/cupsys"
+     elif IsDebian():
+        cups_init_executable = "/etc/init.d/cups"
+     elif IsRedhat():
+        cups_init_executable = "/usr/sbin/service"
+     os.system(cups_init_executable+ " restart")
+
